@@ -30,10 +30,14 @@ const AAMUtils = {
     name:   name of the test
   */
 
-  verifyAPI: function(test_name, id, map) {
+  verifyAPI: async function(test_name, id, map) {
     if (!map) {
       throw "Error: missing accessibility API test map";
     }
+
+    // Turn on accessibility
+    const htmlrole = await test_driver.get_computed_role(document.querySelector("html"));
+    console.log("htmlrole: ", htmlrole);
 
     for (const api of this.APIS) {
       if (map[api] && map[api].length) {

@@ -144,9 +144,12 @@ class AtspiExecutorImpl:
         :param url: The url of the test.
         """
         if not self.root:
-            raise Exception(
-                f"Couldn't find browser {self.product_name} in accessibility API ATSPI. Did you turn on accessibility?"
-            )
+            # Try more more time to find the root browser.
+            self.root = find_browser(self.product_name)
+            if not self.root:
+                raise Exception(
+                    f"Couldn't find browser {self.product_name} in accessibility API ATSPI. Did you turn on accessibility?"
+                )
 
         if self.test_url != url or not self.document:
             self.test_url = url
