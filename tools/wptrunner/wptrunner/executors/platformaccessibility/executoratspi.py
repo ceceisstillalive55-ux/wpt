@@ -85,15 +85,18 @@ def find_browser(name):
     :param name: The name of the browser.
     :return: Atspi.Accessible or None.
     """
-
+    programs = ""
     desktop = Atspi.get_desktop(0)
     child_count = Atspi.Accessible.get_child_count(desktop)
     for i in range(child_count):
         app = Atspi.Accessible.get_child_at_index(desktop, i)
         full_app_name = Atspi.Accessible.get_name(app)
+
+        programs = programs + " " + full_app_name.lower()
+
         if name in full_app_name.lower():
-            return app
-    return None
+            return app, programs
+    return None, programs
 
 
 def find_node(root, dom_id):
@@ -131,11 +134,11 @@ class AtspiExecutorImpl:
         self.document = None
         self.test_url = None
 
-        self.root = find_browser(self.product_name)
-        if not self.root:
-            self.logger.warning(
-                f"Couldn't find browser {self.product_name} in accessibility API ATSPI. Accessibility API queries will not succeeded."
-            )
+        # self.root = find_browser(self.product_name)
+        # if not self.root:
+        #     self.logger.warning(
+        #         f"Couldn't find browser {self.product_name} in accessibility API ATSPI. Accessibility API queries will not succeeded."
+        #     )
 
     def __poll_for_tab_if_necessary(self, url):
         """If accessible node representing the test document for this URL has
@@ -145,10 +148,11 @@ class AtspiExecutorImpl:
         """
         if not self.root:
             # Try more more time to find the root browser.
-            self.root = find_browser(self.product_name)
+            (self.root, programs) = find_browser(self.product_name)
             if not self.root:
                 raise Exception(
-                    f"Couldn't find browser {self.product_name} in accessibility API ATSPI. Did you turn on accessibility?"
+                    f"Couldn't find browser {self.product_name} in accessibility API ATSPI. Did you turn on accessibility? found: {programs}"
+
                 )
 
         if self.test_url != url or not self.document:
